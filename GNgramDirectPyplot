@@ -1,0 +1,30 @@
+import requests
+import pandas as pd
+import matplotlib.pyplot as plt
+
+params = {
+    "content": "hello, goodbye", #Replace "hello, goodbye" by the term(s) of your search
+    "year_start": "1800", #Replace "1800" by the start year of your search
+    "year_end": "2019" #Replace "2019" by the end year of your search
+}
+
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.87 Safari/537.36",
+}
+
+#IMPORTANT! CHANGE THE WORD "GRAPH" OF THE URL OF YOUR NGRAM TO "JSON". Then, replace the link in the following line with the link with json
+html = requests.get("https://books.google.com/ngrams/json?content=hello%2Cgoodbye&year_start=1800&year_end=2019&corpus=en-2019&smoothing=0", params=params, headers=headers, timeout=30).text 
+time_series = pd.read_json(html, typ="series")
+
+year_values = list(range(int(params['year_start']), int(params['year_end']) + 1)) #Makes the list of the year
+
+for series in time_series: #Loops through the rearched keywords (in this case "hello" and "goodbye")
+    plt.plot(year_values, series["timeseries"], label=series["ngram"]) #Plots the data
+
+plt.title("Google Books Ngram Viewer\n")
+lgd=plt.legend(loc="center left", bbox_to_anchor=(1.04, 0.5, 0, 0),frameon=False)
+plt.xticks(list(range(int(params['year_start']), int(params['year_end']) + 1, 20)))
+plt.ylabel("%")
+plt.xlabel("Year")
+plt.savefig('GoogleNgramPlot.png', bbox_extra_artists=(lgd,), bbox_inches='tight',dpi=1000) #Save the plot
+plt.show()
